@@ -1,13 +1,20 @@
-// import { ref, effect } from '@vue/reactivity'
-import { ref, effect } from './core/index.js'
+// import { reactive, effect } from './node_modules/@vue/reactivity/dist/reactivity.esm-browser.js'
+import { reactive, effect } from './core/index.js'
 
-const a = ref(0)
-let b = 0;
-
-effect(() => {
-  b = a.value + 10;
-  console.log(b)
+const user = reactive({
+    name: 'William',
+    age: 18
 })
 
-a.value = 20;
+let age = 0;
 
+effect(() => {
+    age = user.age + 1
+    console.log(`I will be ${age} years old`)
+})
+effect(() => {
+    console.log(`I'm ${user.name}`)
+})
+
+user.age++
+user.name = 'jiehua'

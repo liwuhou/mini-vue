@@ -40,6 +40,28 @@ export const ref = (value) => {
     })
 }
 
+const getDep = (depMap, key) => {
+    return depMap.get(key) ?? (depMap.set(key, new Dep()),getDep(depMap, key))
+}
+
+export const reactive = (raw) => {
+    const depMap = new Map()
+
+    return new Proxy(raw, {
+        get(target, key) {
+            const dep = getDep(depMap, key)
+            dep.depend()
+            return Reflect.get(target, key)
+        },
+        set(target, key, value) {
+            Reflect.set(target, key, value)
+            const dep = getDep(depMap, key)
+            dep.notify()
+            return true
+        }
+    })
+}
+
 export const effect = (fn) => {
     (workInProcessFn = fn)();
     workInProcessFn = null

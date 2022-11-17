@@ -1,20 +1,6 @@
-// import { reactive, effect } from './node_modules/@vue/reactivity/dist/reactivity.esm-browser.js'
-import { reactive, effect } from './core/index.js'
+import { createApp } from './core/index.js'
+import App from './App.js'
 
-const user = reactive({
-    name: 'William',
-    age: 18
-})
 
-let age = 0;
-
-effect(() => {
-    age = user.age + 1
-    console.log(`I will be ${age} years old`)
-})
-effect(() => {
-    console.log(`I'm ${user.name}`)
-})
-
-user.age++
-user.name = 'jiehua'
+console.log('trigger')
+createApp(App).mounted(document.querySelector('#app'))

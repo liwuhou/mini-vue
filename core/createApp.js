@@ -1,5 +1,5 @@
 import { effect } from './index.js'
-import { mountElement } from './render.js'
+import { diff, mountElement } from './render.js'
 
 export function createApp(rootComponent) {
     // app
@@ -21,6 +21,7 @@ export function createApp(rootComponent) {
                     const subTree = rootComponent.render(setResult)
                     console.log('old', prevSubTree)
                     console.log('new', subTree)
+                    diff(prevSubTree, subTree)
                     prevSubTree = subTree
                     // TODO: Diff
 

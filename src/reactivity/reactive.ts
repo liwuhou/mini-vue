@@ -1,18 +1,10 @@
-import { track, trigger } from '.'
+import { mutationHandlers, readonlyHandlers, createActiveHandle } from './baseHandles'
+
 
 export function reactive<T extends Object>(raw: T): T {
+    return createActiveHandle<T>(raw, mutationHandlers)
+}
 
-    return new Proxy(raw, {
-        get(target, key) {
-            track(target, key)
-
-            return Reflect.get(target, key)
-        },
-        set(target, key, value) {
-            const result = Reflect.set(target, key, value)
-            trigger(target, key)
-
-            return result
-        }
-    })
+export function readonly<T extends Object>(raw: T): T {
+    return createActiveHandle(raw, readonlyHandlers)
 }

@@ -3,8 +3,9 @@ let activeEffect: ReactiveEffect | null = null
 export class ReactiveEffect {
     private _fn: () => any
 
-    constructor(_fn: () => any) {
+    constructor(_fn: () => any, public scheduler?: Scheduler) {
         this._fn = _fn
+        this.scheduler = scheduler
     }
 
     run() {
@@ -35,12 +36,20 @@ export function trigger(target: Object, key: IKey) {
     const deps = getDep(target, key)
 
     for (const dep of deps) {
-        dep.run()
+        if (dep?.scheduler) {
+            dep.scheduler()
+        } else {
+            dep.run()
+        }
     }
 }
 
-export function effect(fn: () => any) {
-    const _effect = new ReactiveEffect(fn)
+type Scheduler = () => void
+interface EffectOption {
+    scheduler?: Scheduler
+}
+export function effect(fn: () => any, option?: EffectOption) {
+    const _effect = new ReactiveEffect(fn, option?.scheduler)
 
     _effect.run()
     return _effect.run.bind(_effect)

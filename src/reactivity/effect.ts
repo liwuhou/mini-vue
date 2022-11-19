@@ -1,15 +1,15 @@
 let activeEffect: ReactiveEffect | null = null
 
 export class ReactiveEffect {
-    private _fn: () => void
+    private _fn: () => any
 
-    constructor(_fn: () => void) {
+    constructor(_fn: () => any) {
         this._fn = _fn
     }
 
     run() {
         activeEffect = this
-        this._fn?.()
+        return this._fn()
     }
 }
 
@@ -26,7 +26,7 @@ const getDep: (target: Object, key: IKey) => Set<ReactiveEffect> = (target, key)
 export function track(target: Object, key: IKey) {
     const deps = getDep(target, key)
 
-    if (typeof activeEffect === 'function') {
+    if (activeEffect) {
         deps.add(activeEffect)
     }
 }
@@ -39,8 +39,9 @@ export function trigger(target: Object, key: IKey) {
     }
 }
 
-export function effect(fn: () => void) {
+export function effect(fn: () => any) {
     const _effect = new ReactiveEffect(fn)
 
     _effect.run()
+    return _effect.run.bind(_effect)
 }

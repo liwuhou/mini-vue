@@ -15,4 +15,17 @@ describe('reactive', () => {
         observed.foo++
         expect(nextFoo).toBe(3)
     })
+
+    it('runner', () => {
+        let bar = 0
+        const runner = effect(() => {
+            bar++
+            return 'bar'
+        })
+
+        expect(bar).toBe(1)
+        const res = runner()
+        expect(bar).toBe(2)
+        expect(res).toBe('bar')
+    })
 })

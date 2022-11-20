@@ -1,4 +1,4 @@
-import { readonly, isReadonly } from '..'
+import { readonly, isReadonly, isProxy } from '..'
 
 describe('readonly', () => {
     it('happy path', () => {
@@ -20,6 +20,7 @@ describe('readonly', () => {
             name: 'william'
         })
 
+        // change readonly properties 
         user.name = 'jiehua'
 
         expect(console.error).toBeCalled()
@@ -31,5 +32,12 @@ describe('readonly', () => {
 
         expect(isReadonly(original)).toBeFalsy()
         expect(isReadonly(readonlyData)).toBeTruthy()
+    })
+
+    it('is_proxy', () => {
+        const readonlyData = readonly({ foo: 1, bar: { baz: 2 } })
+
+        expect(isProxy(readonlyData)).toBeTruthy()
+        expect(isProxy(readonlyData.bar)).toBeTruthy()
     })
 })

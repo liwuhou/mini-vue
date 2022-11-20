@@ -25,3 +25,7 @@ export function isReactive(value: Record<string, any>): boolean {
 export function isReadonly(value: Record<string, any>): boolean {
     return !!value[ReactiveFlags.IS_READONLY]
 }
+
+export function isProxy(value: Record<string, any>): boolean {
+    return isReactive(value) || isReadonly(value);
+}

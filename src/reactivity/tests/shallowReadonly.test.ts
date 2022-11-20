@@ -1,4 +1,4 @@
-import { isReadonly, shallowReadonly } from '..'
+import { isProxy, isReadonly, shallowReadonly } from '..'
 
 describe('shallowReadonly', () => {
     it('should not maoke non-reacitve properties reactive', () => {
@@ -18,5 +18,12 @@ describe('shallowReadonly', () => {
         user.name = 'jiehua'
 
         expect(console.error).toBeCalled()
+    })
+
+    it('is_proxy', () => {
+        const shallowReadonlyData = shallowReadonly({ foo: 1, bar: { baz: 2 } })
+
+        expect(isProxy(shallowReadonly(shallowReadonlyData))).toBeTruthy()
+        expect(isProxy(shallowReadonlyData.bar)).toBeFalsy()
     })
 })

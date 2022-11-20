@@ -1,4 +1,5 @@
 import { reactive, effect, isReactive } from '..'
+import { isProxy } from '../reactive'
 
 describe('reactive', () => {
 
@@ -37,5 +38,11 @@ describe('reactive', () => {
         expect(isReactive(observed.nested)).toBeTruthy()
         expect(isReactive(observed.array)).toBeTruthy()
         expect(isReactive(observed.array[0])).toBeTruthy()
+    })
+
+    it('is_proxy', () => {
+        const observed = reactive({ foo: 1, bar: { baz: 2 } })
+        expect(isProxy(observed)).toBeTruthy()
+        expect(isProxy(observed.bar)).toBeTruthy()
     })
 })

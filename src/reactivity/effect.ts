@@ -53,17 +53,32 @@ const getDep: (target: Object, key: IKey) => Set<ReactiveEffect> = (target, key)
     return map.get(key) ?? (map.set(key, new Set<ReactiveEffect>()), map.get(key))
 }
 
+function isTracking() {
+    return activeEffect !== null && shouldTrack
+}
+
 export function track(target: Object, key: IKey) {
-    if (!activeEffect || !shouldTrack) return
+    if (!isTracking()) return
 
     const dep = getDep(target, key)
-    dep.add(activeEffect)
-    activeEffect.deps.push(dep)
+    trackEffects(dep)
+}
+
+export function trackEffects(dep: Set<ReactiveEffect>) {
+    if (!isTracking()) return
+    if (dep.has(activeEffect!)) return
+
+    dep.add(activeEffect!)
+    activeEffect?.deps.push(dep)
 }
 
 export function trigger(target: Object, key: IKey) {
     const deps = getDep(target, key)
 
+    triggerEffects(deps)
+}
+
+export function triggerEffects(deps: Set<ReactiveEffect>) {
     for (const dep of deps) {
         if (dep?.scheduler) {
             dep.scheduler()

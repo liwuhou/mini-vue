@@ -63,7 +63,7 @@ export type ReadonlyObject<T extends Record<string, any> = {}> = {
     [ReactiveFlags.IS_READONLY]?: boolean
 }
 
-export type ProxiedObject<T extends Record<string, any> = {}> = {
+export type ProxiedObject<T extends Object = {}> = {
     [key in keyof T]: T[key]
 } & {
     [ReactiveFlags.IS_REACTIVE]?: boolean

@@ -1,4 +1,4 @@
-import { mutationHandlers, readonlyHandlers, createActiveHandle } from './baseHandles'
+import { mutationHandlers, readonlyHandlers, shallowReadonlyHandlers, createActiveHandle, ReadonlyObject } from './baseHandles'
 import type { ProxiedObject } from './baseHandles'
 
 export enum ReactiveFlags {
@@ -10,8 +10,12 @@ export function reactive<T extends Object>(raw: T): ProxiedObject<T> {
     return createActiveHandle<T>(raw, mutationHandlers)
 }
 
-export function readonly<T extends Object>(raw: T): ProxiedObject<T> {
+export function readonly<T extends Object>(raw: T): ReadonlyObject<T> {
     return createActiveHandle<T>(raw, readonlyHandlers)
+}
+
+export function shallowReadonly<T extends Object>(raw: T): ReadonlyObject<T> {
+    return createActiveHandle<T>(raw, shallowReadonlyHandlers)
 }
 
 export function isReactive(value: Record<string, any>): boolean {

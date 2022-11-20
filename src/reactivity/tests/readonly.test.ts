@@ -1,4 +1,4 @@
-import { readonly } from '..'
+import { readonly, isReadonly } from '..'
 
 describe('readonly', () => {
     it('happy path', () => {
@@ -22,5 +22,13 @@ describe('readonly', () => {
         user.name = 'jiehua'
 
         expect(console.error).toBeCalled()
+    })
+
+    it('is_readonly', () => {
+        const original = { foo: 1 }
+        const readonlyData = readonly(original)
+
+        expect(isReadonly(original)).toBeFalsy()
+        expect(isReadonly(readonlyData)).toBeTruthy()
     })
 })

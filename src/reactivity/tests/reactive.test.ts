@@ -1,4 +1,4 @@
-import { reactive, effect } from '..'
+import { reactive, effect, isReactive } from '..'
 
 describe('reactive', () => {
 
@@ -15,5 +15,13 @@ describe('reactive', () => {
         expect(nextFoo).toBe(2)
         observed.foo++
         expect(nextFoo).toBe(3)
+    })
+
+    it('is_reactive', () => {
+        const original = { foo: 1 }
+        const observed = reactive(original)
+
+        expect(isReactive(original)).toBeFalsy()
+        expect(isReactive(observed)).toBeTruthy()
     })
 })

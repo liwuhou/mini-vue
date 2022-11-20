@@ -1,4 +1,5 @@
 import { track, trigger } from "."
+import { ReactiveFlags } from './reactive'
 
 type Key = string | symbol
 interface BaseHandles {
@@ -12,6 +13,8 @@ const readonlyGet = createGetter(true)
 
 function createGetter<T extends Object>(isReadonly = false) {
     return function (target: T, key: string | symbol) {
+        if (key === ReactiveFlags.IS_REACTIVE) return !isReadonly
+        if (key === ReactiveFlags.IS_READONLY) return isReadonly
         if (!isReadonly) track(target, key)
 
         return Reflect.get(target, key)
@@ -40,6 +43,12 @@ export const readonlyHandlers = {
     }
 }
 
-export function createActiveHandle<T extends Object>(raw: T, baseHandlres: BaseHandles): T {
-    return new Proxy<T>(raw, baseHandlres)
+export type ProxiedObject<T extends Record<string, any> = {}> = {
+    [key in keyof T]: T[key]
+} & {
+    [ReactiveFlags.IS_REACTIVE]: boolean
+}
+
+export function createActiveHandle<T extends Object>(raw: T, baseHandlres: BaseHandles): ProxiedObject<T> {
+    return new Proxy<ProxiedObject<T>>(raw as ProxiedObject<T>, baseHandlres)
 }

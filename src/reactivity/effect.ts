@@ -1,4 +1,5 @@
 let activeEffect: ReactiveEffect | null = null
+let shouldTrack: boolean = false
 
 type Runner = {
     (): any
@@ -19,9 +20,14 @@ export class ReactiveEffect {
     }
 
     run() {
+        if (!this._active) return this._fn()
+
+        shouldTrack = true
         activeEffect = this
-        this._active = true
-        return this._fn()
+        const result = this._fn()
+        shouldTrack = false
+
+        return result
     }
 
     stop() {
@@ -48,12 +54,11 @@ const getDep: (target: Object, key: IKey) => Set<ReactiveEffect> = (target, key)
 }
 
 export function track(target: Object, key: IKey) {
-    const dep = getDep(target, key)
+    if (!activeEffect || !shouldTrack) return
 
-    if (activeEffect) {
-        dep.add(activeEffect)
-        activeEffect.deps.push(dep)
-    }
+    const dep = getDep(target, key)
+    dep.add(activeEffect)
+    activeEffect.deps.push(dep)
 }
 
 export function trigger(target: Object, key: IKey) {

@@ -14,7 +14,7 @@ describe('shallowReadonly', () => {
             name: 'william'
         })
 
-        // change readonly properties 
+        // @ts-ignore: change readonly properties 
         user.name = 'jiehua'
 
         expect(console.error).toBeCalled()

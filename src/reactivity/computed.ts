@@ -1,5 +1,5 @@
-import { hasChange } from "../shared"
-import { ReactiveEffect } from '.'
+import { hasChange } from "../shared/index"
+import { ReactiveEffect } from './index'
 
 class ComputedRefImpl<T> {
     private _getter: () => T

@@ -1,4 +1,4 @@
-import { track } from "./effect"
+import { track } from "./index"
 
 export class Dep {
     deps: Set<() => {}>

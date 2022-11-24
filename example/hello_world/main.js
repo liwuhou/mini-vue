@@ -1,3 +1,6 @@
-import { createApp } from '../../src/runtime-core'
+import { createApp } from '../../lib/guide-mini-vue-esm.js'
+import { App } from './app.js'
 
-createApp(App).mounted('#app')
+const res = createApp(App)
+console.log('res', res)
+res.mounted('#app')

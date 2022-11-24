@@ -1,5 +1,5 @@
-import { track, trigger } from "."
-import { extend, isObject } from "../shared"
+import { track, trigger } from "./index"
+import { extend, isObject } from "../shared/index"
 import { reactive, ReactiveFlags, readonly } from './reactive'
 
 type Key = string | symbol
@@ -13,7 +13,7 @@ const set = createSetter()
 const readonlyGet = createGetter(true)
 const shallowReadonlyGet = createGetter(true, true)
 
-function createGetter<T extends Object>(isReadonly = false, isShallow = false) {
+function createGetter<T extends Record<string, any>>(isReadonly = false, isShallow = false) {
     return function (target: T, key: string | symbol) {
         if (key === ReactiveFlags.IS_REACTIVE) return !isReadonly
         if (key === ReactiveFlags.IS_READONLY) return isReadonly

@@ -1,6 +1,6 @@
-import { trackEffects, triggerEffects, reactive } from '.'
+import { trackEffects, triggerEffects, reactive } from './index'
 import type { ReactiveEffect } from './effect'
-import { hasChange, isObject } from '../shared'
+import { hasChange, isObject } from '../shared/index'
 
 export type BaseTypes = string | number | boolean
 export interface Ref<T = any> {

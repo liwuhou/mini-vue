@@ -1,9 +1,9 @@
-import { createComponentInstance, setupComponent } from '.'
-import type { VNode } from '.'
+import { createComponentInstance, setupComponent } from './index'
+import type { VNode } from './index'
 import { ComponentInstance } from './component'
 import { Component } from './vnode'
 
-type Container = string | HTMLElement
+type Container = HTMLElement
 export type Render = (vnode: VNode, container: Container) => void
 
 export const render: Render = (vnode, container) => {

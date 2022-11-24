@@ -15,7 +15,8 @@ export type {
     VNode,
     VNodeType,
     Component,
-    SetupResult
+    SetupResult,
+    CreateVNode
 } from './vnode'
 
 export {
@@ -32,3 +33,7 @@ export {
     createComponentInstance,
     setupComponent
 } from './component'
+
+export {
+    h
+} from './h'

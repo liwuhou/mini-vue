@@ -17,9 +17,9 @@ export type VNode = {
     props?: Props
     children?: Children
 }
-export type createVNode = (type: string, props?: Props, children?: Children) => VNode
+export type CreateVNode = (type: string, props?: Props, children?: Children) => VNode
 
-export const createVNode: createVNode = (type, props, children) => {
+export const createVNode: CreateVNode = (type, props, children) => {
     return {
         type,
         props,

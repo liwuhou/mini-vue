@@ -1,6 +1,6 @@
-import { isObject } from './../shared';
-import { VNode, VNodeType, Component } from '.'
-import type { SetupResult } from '.'
+import { isObject } from '../shared/index';
+import { VNode, VNodeType, Component } from './index'
+import type { SetupResult } from './index'
 
 export type ComponentInstance = {
     vnode: VNode,
@@ -53,9 +53,7 @@ const handleSetupResult: HandleSetupResult = (instance, result) => {
 type FinishComponentSetup = (instance: ComponentInstance) => void
 const finishComponentSetup: FinishComponentSetup = (instance) => {
     // Implement
-    const Component = instance.type
+    const component = instance.type
 
-    if ((Component as Component)?.render) {
-
-    }
+        ; (component as Component)?.render?.()
 }

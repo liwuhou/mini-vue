@@ -3,7 +3,7 @@ import { VNode, VNodeType, Component } from './index'
 import type { SetupResult } from './index'
 
 export type ComponentInstance = {
-    vnode: VNode,
+    vnode: VNode
     type?: VNodeType
     setupState?: SetupResult
 }
@@ -26,8 +26,8 @@ export const setupComponent: SetupComponent = (instance) => {
 
 export type SetupStatefulComponent = (instance: ComponentInstance) => void
 export const setupStatefulComponent: SetupStatefulComponent = (instance) => {
-    const component: VNodeType = instance.vnode.type
     instance.type = instance.vnode.type
+    const component = instance.type
     const { setup } = component as Component
 
     if (typeof setup === 'function') {

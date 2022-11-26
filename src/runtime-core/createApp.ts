@@ -1,7 +1,7 @@
 import { render, createVNode } from './index'
 
 export type AppComponent = {
-    mounted(container: string | HTMLElement): void
+    mounted(container: string | Element): void
 }
 export type CreateApp = (rootComponent: string) => AppComponent
 
@@ -12,14 +12,17 @@ export const createApp: CreateApp = (rootComponent) => {
             // transform vnode
             const vnode = createVNode(rootComponent)
 
-            render(vnode, rootElement!)
+            render(vnode, rootElement)
         }
     }
 }
 
-const findElement = (rootStr: string | HTMLElement): HTMLElement | null => {
+const findElement = (rootStr: string | Element): Element | never => {
     if (typeof rootStr === 'string') {
-        return document.querySelector(rootStr)
+        const elm = document.querySelector(rootStr)
+        if (!elm) throw new TypeError('Mounte method need a Element!')
+
+        return elm
     } else {
         return rootStr
     }

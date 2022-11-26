@@ -33,40 +33,39 @@ const processComponent: ProcessComponent = (vnode, container) => {
     mountComponent(vnode, container)
 }
 
-type MountComponent = (vnode: VNode, container: Container) => void
-const mountComponent: MountComponent = (vnode, container) => {
-    const instance = createComponentInstance(vnode)
+type MountComponent = (initialVnode: VNode, container: Container) => void
+const mountComponent: MountComponent = (initialVnode, container) => {
+    const instance = createComponentInstance(initialVnode)
 
     setupComponent(instance)
-    setupRenderEffect(instance, container)
+    setupRenderEffect(instance, initialVnode, container)
 }
 
 
-type SetupRenderEffect = (instance: ComponentInstance, container: Container) => void
-const setupRenderEffect: SetupRenderEffect = (instance, container) => {
-    const subTree = (instance.type as Component)?.render?.call(instance.setupState) as VNode // FIXME: Text type will to do something
+type SetupRenderEffect = (instance: ComponentInstance, initialVnode: VNode, container: Container) => void
+const setupRenderEffect: SetupRenderEffect = (instance, initialVnode, container) => {
+    const subTree = (instance.type as Component)?.render?.call(instance.proxy) as VNode // FIXME: Text type will to do something
     // vnode -> patch => dom ,mounted the root component
 
     patch(subTree, container)
+    initialVnode.el = subTree.el
 }
 
 type ProcessElement = (vnode: ElementNode, container: Container) => void
 const processElement: ProcessElement = (vnode, contaner) => {
-    debugger
     mountElement(vnode, contaner)
 }
 
 type MountElemet = (vnode: ElementNode, container: Container) => void
 const mountElement: MountElemet = (vnode, container) => {
     const { type, props, children } = vnode
-    const element = createElement(type)
+    const element = vnode.el = createElement(type)
 
     if (isObject(props)) {
         for (const attr of Object.keys(props!)) {
             element.setAttribute(attr, props![attr])
         }
     }
-
     if (isArray(children)) {
         (children as VNode[]).forEach((node) => {
             patch(node, element)

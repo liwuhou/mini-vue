@@ -1,11 +1,13 @@
 import { isObject } from '../shared/index';
 import { VNode, VNodeType, Component } from './index'
 import type { SetupResult } from './index'
+import { publicProxyHandlers } from './componentPublicProxyHandler';
 
 export type ComponentInstance = {
     vnode: VNode
     type?: VNodeType
     setupState?: SetupResult
+    proxy?: Record<string, any>
 }
 export type CreateComponentInstance = (vnode: VNode) => ComponentInstance
 export const createComponentInstance: CreateComponentInstance = (vnode) => {
@@ -29,12 +31,13 @@ export const setupStatefulComponent: SetupStatefulComponent = (instance) => {
     instance.type = instance.vnode.type
     const component = instance.type
     const { setup } = component as Component
+    const setupResult = (typeof setup === 'function' ? setup(instance) : setup) ?? {}
 
-    if (typeof setup === 'function') {
-        const setupResult = setup(instance)
+    handleSetupResult(instance, setupResult)
 
-        handleSetupResult(instance, setupResult)
-    }
+    instance.proxy = new Proxy({
+        _: instance
+    }, publicProxyHandlers)
 }
 
 type HandleSetupResult = (instance: ComponentInstance, result: SetupResult) => void

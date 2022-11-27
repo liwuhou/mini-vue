@@ -1,81 +1,61 @@
-import { trackEffects, triggerEffects, reactive } from './index'
-import type { ReactiveEffect } from './effect'
-import { hasChange, isObject } from '../shared/index'
+import { trackEffects, triggerEffects } from './effect'
+import { reactive } from './reactive'
+import { isObject } from './tool'
 
-export type BaseTypes = string | number | boolean
-export interface Ref<T = any> {
-    value: T
-    __v_isRef: boolean
-}
-export type ShallowRef<T = any> = Ref<T>
-
-export type UnwrapRef<T> = T extends ShallowRef<infer V>
-    ? V
-    : T extends Ref<infer V>
-    ? UnwrapRefSimple<V>
-    : UnwrapRefSimple<T>
-
-export type UnwrapRefSimple<T> = T extends
-    | Function
-    | BaseTypes
-    | Ref
-    ? T
-    : T extends ReadonlyArray<any>
-    ? { [K in keyof T]: UnwrapRefSimple<T[K]> }
-    : T
-
-
-class RefImpl<T extends object | BaseTypes = any>{
-    private _value: T
-    private _rawValue: T
-    public readonly __v_isRef: boolean = true
-    public dep: Set<ReactiveEffect>
-    constructor(value: T) {
-        this._rawValue = value
-        this._value = convert<T>(value)
-        this.dep = new Set()
+class RefImpl {
+    private _value: any;
+    public dep;
+    public __v_isRef = true;
+    constructor(value) {
+        if (isObject(value)) {
+            this._value = reactive(value);
+        } else {
+            this._value = value
+        }
+        this.dep = new Set();
     }
 
-    get value(): T {
-        trackEffects(this.dep)
-        return this._value
+    get value() {
+        trackEffects(this.dep);
+        return this._value;
     }
 
     set value(newValue) {
-        if (hasChange(newValue, this._rawValue)) return
+        if (newValue === this._value) return;
+        this._value = newValue;
+        triggerEffects(this.dep);
+    }
 
-        this._rawValue = newValue
-        this._value = convert(newValue)
-        triggerEffects(this.dep)
+    unRef () {
+        return this._value;
     }
 }
 
-function convert<T extends Object>(value: T): T {
-    return isObject(value) ? reactive<T>(value) : value as T
+export function isRef(value: any) {
+    return !!value.__v_isRef;
 }
 
-export function ref<T extends BaseTypes | Object>(value: T): Ref<T> {
-    return new RefImpl<T>(value)
+export function ref(value) {
+    return new RefImpl(value);
 }
 
-export function isRef<T>(ref: Ref<T> | unknown): ref is Ref<T> {
-    return (!!ref && (ref as Ref<T>).__v_isRef === true)
+export function unRef(value: any) {
+    if (isRef(value)) return value.unRef();
+    return value;
 }
 
-export function unRef<T>(ref: T | Ref<T>): T {
-    return isRef(ref) ? (ref.value as any) : ref
-}
-
-export function proxyRef<T extends Record<string | symbol, any>>(ObjectWithRefs: T): T {
-    return new Proxy<T>(ObjectWithRefs, {
-        get(target: T, key: string) {
-            return unRef(Reflect.get(target, key))
+export function proxyRefs(obj) {
+    return new Proxy(obj, {
+        get(target, key) {
+            return unRef(Reflect.get(target, key));
         },
-        set(target: T, key: string | symbol, value: any) {
-            if (isRef(Reflect.get(target, key)) && !isRef(value)) {
-                return target[key].value = value
+
+        set(target, key, value) {
+            if (isRef(target[key]) && !isRef(value)) {
+                target[key].value = value;
+                return true;
             } else {
-                return Reflect.set(target, key, value)
+                return Reflect.set(target, key, value);
             }
         }
     })

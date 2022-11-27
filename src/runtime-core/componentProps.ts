@@ -1,7 +1,10 @@
-import { ComponentInstance } from "./component";
-import { Props } from "./vnode";
+import { Component } from "./types/index";
 
-export type InitProps = (instance: ComponentInstance, rawProps?: Props) => void
-export const initProps: InitProps = (instance, rawProps = {}) => {
-    instance.props = rawProps
+/**
+ * 初始化props参数对象
+ * @param instance 
+ * @param props 
+ */
+ export function initProps(instance: Component, rawProps: any) {
+    instance.props = rawProps || {};
 }

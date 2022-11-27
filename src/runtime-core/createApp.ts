@@ -1,29 +1,20 @@
-import { render, createVNode } from './index'
+import { createVNode } from "./vnode";
 
-export type AppComponent = {
-    mounted(container: string | Element): void
-}
-export type CreateApp = (rootComponent: string) => AppComponent
+export function createAppAPI(render) {
+    /**
+     * 创建APP实例
+     * @param rootComponent 根组件return
+     * @returns 
+     */
+    return function createApp(rootComponent: object) {
+        return {
+            mount(rootContainer:any) {
+                // 1、先将组件转换为虚拟节点（vnode），后续操作都将基于虚拟节点进行操作
+                const vnode = createVNode(rootComponent);
 
-export const createApp: CreateApp = (rootComponent) => {
-    return {
-        mounted(rootContainer) {
-            const rootElement = findElement(rootContainer)
-            // transform vnode
-            const vnode = createVNode(rootComponent)
-
-            render(vnode, rootElement)
+                // 2、拿到虚拟节点后，开始进行实际渲染
+                render(vnode, rootContainer);
+            }
         }
-    }
-}
-
-const findElement = (rootStr: string | Element): Element | never => {
-    if (typeof rootStr === 'string') {
-        const elm = document.querySelector(rootStr)
-        if (!elm) throw new TypeError('Mounte method need a Element!')
-
-        return elm
-    } else {
-        return rootStr
     }
 }

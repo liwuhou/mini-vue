@@ -1,5 +1,11 @@
-import { createVNode } from "./vnode"
-import type { CreateVNode } from "./vnode"
+import { createVNode } from "./vnode";
 
-export type H = CreateVNode
-export const h: H = (type, props, children) => createVNode(type, props, children)
+/**
+ * 提供页面使用的创建节点方法
+ * @param type 
+ * @param props 
+ * @param children 
+ */
+export function h(type: any, props?: object, children?: string | Array<any>) {
+    return createVNode(type, props, children);
+}

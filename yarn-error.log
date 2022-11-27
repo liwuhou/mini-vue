@@ -1,49 +1,68 @@
 Arguments: 
-  /Users/awu/.nvm/versions/node/v16.18.1/bin/node /Users/awu/.nvm/versions/node/v16.18.1/bin/yarn
+  /Users/awu/.nvm/versions/node/v16.13.0/bin/node /Users/awu/.nvm/versions/node/v16.13.0/bin/yarn
 
 PATH: 
-  /Users/awu/.nvm/versions/node/v16.18.1/bin:/Users/awu/Library/pnpm:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+  /Users/awu/Library/pnpm:/usr/local/bin:/usr/local/sbin:/Library/Frameworks/Python.framework/Versions/2.7/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Applications/VMware Fusion.app/Contents/Public:/usr/local/go/bin:/Library/Apple/usr/bin:/Users/awu/Library/pnpm:/Users/awu/.nvm/versions/node/v16.13.0/bin:/usr/local/sbin:/Library/Frameworks/Python.framework/Versions/2.7/bin:/Users/awu/.cargo/bin:/usr/local/bin
 
 Yarn version: 
-  1.22.19
+  1.22.17
 
 Node version: 
-  16.18.1
+  16.13.0
 
 Platform: 
   darwin x64
 
 Trace: 
-  Error: https://registry.npmjs.org/@rollup/plugin-typescript/-/plugin-typescript-9.0.2.tgz: ETIMEDOUT
-      at Timeout._onTimeout (/Users/awu/.nvm/versions/node/v16.18.1/lib/node_modules/yarn/lib/cli.js:141550:19)
-      at listOnTimeout (node:internal/timers:559:17)
-      at processTimers (node:internal/timers:502:7)
+  Error: https://r2.cnpmjs.org/is-port-reachable/-/is-port-reachable-4.0.0.tgz: ESOCKETTIMEDOUT
+      at ClientRequest.<anonymous> (/Users/awu/.nvm/versions/node/v16.13.0/lib/node_modules/yarn/lib/cli.js:141510:19)
+      at Object.onceWrapper (node:events:509:28)
+      at ClientRequest.emit (node:events:390:28)
+      at TLSSocket.emitRequestTimeout (node:_http_client:763:9)
+      at Object.onceWrapper (node:events:509:28)
+      at TLSSocket.emit (node:events:402:35)
+      at TLSSocket.Socket._onTimeout (node:net:501:8)
+      at listOnTimeout (node:internal/timers:557:17)
+      at processTimers (node:internal/timers:500:7)
 
 npm manifest: 
   {
-      "name": "mini-vue",
-      "version": "1.0.0",
-      "main": "lib/guide-mini-vue-cjs.js",
-      "module": "lib/guide-mini-vue-esm.js",
-      "repository": "git@github.com:liwuhou/mini-vue.git",
-      "author": "阿五 <hugewilliam@foxmail.com>",
-      "license": "MIT",
-      "scripts": {
-          "test": "jest",
-          "build": "rollup -c rollup.config.js --bundleConfigAsCjs"
-      },
-      "devDependencies": {
-          "@babel/core": "^7.20.2",
-          "@babel/preset-env": "^7.20.2",
-          "@babel/preset-typescript": "^7.18.6",
-          "@rollup/plugin-typescript": "^9.0.2",
-          "@types/jest": "^29.2.3",
-          "babel-jest": "^29.3.1",
-          "jest": "^29.3.1",
-          "rollup": "^3.4.0",
-          "tslib": "^2.4.1",
-          "typescript": "^4.9.3"
-      }
+    "name": "minivue-jeffzhang",
+    "version": "1.0.0",
+    "description": "",
+    "main": "lib/guide-mini-vue.cjs.js",
+    "module": "lib/guide-mini-vue.esm.js",
+    "type": "module",
+    "scripts": {
+      "test": "jest",
+      "build": "rollup -c rollup.config.js --bundleConfigAsCjs",
+      "build:test": "rollup -c rollup.config.js --watch",
+      "cypress": "cypress run",
+      "serve": "serve .",
+      "test:cy-open": "cypress open"
+    },
+    "repository": {
+      "type": "git",
+      "url": "http://talkcheap.xiaoeknow.com/vue3study/minivue-jeffzhang.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {},
+    "devDependencies": {
+      "@babel/core": "^7.20.2",
+      "@babel/preset-env": "^7.20.2",
+      "@babel/preset-typescript": "^7.18.6",
+      "@rollup/plugin-typescript": "^9.0.2",
+      "@types/jest": "^29.2.3",
+      "babel-jest": "^29.3.1",
+      "jest": "^29.3.1",
+      "rollup": "^3.4.0",
+      "tslib": "^2.4.1",
+      "typescript": "^4.8.4",
+      "cypress": "^11.1.0",
+      "serve": "^14.1.1"
+    }
   }
 
 yarn manifest: 

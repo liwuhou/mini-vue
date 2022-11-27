@@ -1,39 +1,6 @@
-export type {
-    AppComponent,
-    CreateApp
-} from './createApp'
-
-export {
-    createApp
-} from './createApp'
-
-export {
-    render
-} from './render'
-
-export type {
-    VNode,
-    VNodeType,
-    Component,
-    SetupResult,
-    CreateVNode
-} from './vnode'
-
-export {
-    createVNode
-} from './vnode'
-
-export type {
-    CreateComponentInstance,
-    ComponentInstance,
-    SetupComponent
-} from './component'
-
-export {
-    createComponentInstance,
-    setupComponent
-} from './component'
-
-export {
-    h
-} from './h'
+export { h } from "./h";
+export { renderSlots } from "./renderSlots";
+export { createTextVNode } from "./vnode";
+export { getCurrentInstance } from "./component";
+export { provide, inject } from "./apiInject";
+export { createRender } from "./render";

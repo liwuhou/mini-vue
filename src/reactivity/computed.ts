@@ -1,38 +1,28 @@
-import { hasChange } from "../shared/index"
-import { ReactiveEffect } from './index'
+import { ReactiveEffect } from "./effect";
 
-class ComputedRefImpl<T> {
-    private _getter: () => T
-    private _dirty: any = true
-    private _value?: T
-    private _effect: ReactiveEffect
-    constructor(getter: () => T) {
-        this._getter = getter
-        this._effect = new ReactiveEffect(getter, {
-            scheduler: () => {
-                if (!this._dirty) {
-                    this._dirty = true
-                }
+
+class ComputedRefImpl {
+    private _getter: any;
+    private _dirty: any = true;
+    private _value: any;
+    private _effect: ReactiveEffect;
+    constructor(getter) {
+        this._getter = getter;
+        this._effect = new ReactiveEffect(getter, () => {
+            if (!this._dirty) {
+                this._dirty = true;
             }
-        })
+        });
     }
-
     get value() {
         if (this._dirty) {
-            this._dirty = false
-            this._value = this._effect.run()
+            this._dirty = false;
+            this._value = this._effect.run();
         }
-        return this._value
-    }
-
-    set value(newValue) {
-        if (hasChange(newValue, this._value)) {
-
-        }
+        return this._value;
     }
 }
 
-export function computed<T>(getter: () => T): ComputedRefImpl<T> {
-
-    return new ComputedRefImpl(getter)
+export function computed (getter) {
+    return new ComputedRefImpl(getter);
 }

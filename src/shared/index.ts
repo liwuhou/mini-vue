@@ -5,3 +5,5 @@ export const isObject = (val: unknown): boolean => !!val && typeof val === 'obje
 export const isArray = (val: unknown): boolean => Array.isArray(val)
 
 export const hasChange = (val1: unknown, val2: unknown): boolean => Object.is(val1, val2)
+
+export const isOn = (eventName: string): boolean => /^on[A-Z]/.test(eventName)

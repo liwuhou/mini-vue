@@ -3,7 +3,7 @@ import type { VNode } from './index'
 import { ComponentInstance } from './component'
 import { Component } from './vnode'
 import { createElement } from './dom'
-import { isArray, isObject } from '../shared/index'
+import { isArray, isObject, isOn } from '../shared/index'
 import { ShapeFlags } from '../shared/shapeFlags'
 
 type Container = Element
@@ -60,7 +60,11 @@ const mountElement: MountElemet = (vnode, container) => {
     const element = vnode.el = createElement(type)
 
     if (isObject(props)) {
+
         for (const attr of Object.keys(props!)) {
+            if (isOn(attr)) {
+                element.addEventListener(attr.substring(2).toLowerCase(), props![attr])
+            }
             element.setAttribute(attr, props![attr])
         }
     }

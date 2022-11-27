@@ -4,6 +4,7 @@ import { ComponentInstance } from './component'
 import { Component } from './vnode'
 import { createElement } from './dom'
 import { isArray, isObject } from '../shared/index'
+import { ShapeFlags } from '../shared/shapeFlags'
 
 type Container = Element
 type ElementNode = VNode & { type: string }
@@ -15,17 +16,14 @@ export const render: Render = (vnode, container) => {
 
 type Patch = (node: VNode | ElementNode, container: Container) => void
 const patch: Patch = (vnode, container) => {
-    console.log('🤔 ~ file: render.ts ~ line 15 ~ vnode', vnode)
-    if (typeof vnode.type === 'string') {
+    const { shapeFlags } = vnode
+    if (shapeFlags & ShapeFlags.ELEMENT) {
         // if element -> mount the element to view
         processElement(vnode as ElementNode, container)
-    } else if (isObject(vnode.type)) {
+    } else if (shapeFlags & ShapeFlags.STATEFUL_COMPONENT) {
         // if vnode -> process the vnode 
         processComponent(vnode, container)
     }
-
-    // TODO: mount element
-
 }
 
 type ProcessComponent = (vnode: VNode, container: Container) => void
@@ -58,7 +56,7 @@ const processElement: ProcessElement = (vnode, contaner) => {
 
 type MountElemet = (vnode: ElementNode, container: Container) => void
 const mountElement: MountElemet = (vnode, container) => {
-    const { type, props, children } = vnode
+    const { shapeFlags, type, props, children } = vnode
     const element = vnode.el = createElement(type)
 
     if (isObject(props)) {
@@ -66,14 +64,14 @@ const mountElement: MountElemet = (vnode, container) => {
             element.setAttribute(attr, props![attr])
         }
     }
-    if (isArray(children)) {
+
+    if (shapeFlags & ShapeFlags.TEXT_CHILDREN) {
+        element.textContent = String(children)
+    } else if (shapeFlags & ShapeFlags.ARRAY_CHILDREN) {
         (children as VNode[]).forEach((node) => {
             patch(node, element)
         })
-    } else if (typeof children === 'string') {
-        element.textContent = children
     }
 
     container.append(element)
-
 }

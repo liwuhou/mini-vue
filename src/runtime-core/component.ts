@@ -1,10 +1,13 @@
-import { isObject } from '../shared/index';
-import { VNode, VNodeType, Component } from './index'
 import type { SetupResult } from './index'
+import type { UserEmit } from './componentEmit';
+import type { VNode, VNodeType, Component } from './index'
+import type { Props } from './vnode';
+
+import { isObject } from '../shared/index';
 import { publicProxyHandlers } from './componentPublicProxyHandler';
-import { Props } from './vnode';
 import { initProps } from './componentProps';
 import { shallowReadonly } from '../reactivity/reactive';
+import { emit } from './componentEmit'
 
 export type ComponentInstance = {
     vnode: VNode
@@ -12,12 +15,18 @@ export type ComponentInstance = {
     setupState?: SetupResult
     proxy?: Record<string, any>
     props?: Props
+    emit: UserEmit
 }
 export type CreateComponentInstance = (vnode: VNode) => ComponentInstance
 export const createComponentInstance: CreateComponentInstance = (vnode) => {
-    const instance = {
-        vnode
+    const instance: ComponentInstance = {
+        vnode,
+        type: vnode.type,
+        setupState: {},
+        props: {},
+        emit: () => { }
     }
+    instance.emit = emit.bind(null, instance)
 
     return instance
 }
@@ -36,7 +45,9 @@ export const setupStatefulComponent: SetupStatefulComponent = (instance) => {
     instance.type = instance.vnode.type
     const component = instance.type
     const { setup } = component as Component
-    const setupResult = (typeof setup === 'function' ? setup(shallowReadonly(instance?.props ?? {})) : setup) ?? {}
+    const setupResult = (typeof setup === 'function' ? setup(shallowReadonly(instance?.props ?? {}), {
+        emit: instance.emit,
+    }) : setup) ?? {}
 
     handleSetupResult(instance, setupResult)
 

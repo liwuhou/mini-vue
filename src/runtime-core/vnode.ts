@@ -1,14 +1,18 @@
+import type { UserEmit } from "./componentEmit"
+
 import { isArray, isObject } from "../shared/index"
 import { ShapeFlags } from "../shared/shapeFlags"
-import type { ComponentInstance } from "./component"
 
 export type Props = Record<string, any>
 export type Children = VNode[] | string
+export interface SetupOption {
+    emit: UserEmit
+}
 
 export type SetupResult = Record<string, any> | void
 export type Component = {
     data?: () => Record<string, any>
-    setup?: ((props?: Props) => SetupResult) | SetupResult
+    setup?: ((props?: Props, option?: SetupOption) => SetupResult) | SetupResult
     render?: (setupResult?: SetupResult) => VNode
     computed?: () => void // TODO
 }
@@ -20,6 +24,7 @@ export type VNode = {
     children?: Children
     el: null | Element
     shapeFlags: number
+    emit?: UserEmit
 }
 export type CreateVNode = (type: string, props?: Props, children?: Children) => VNode
 

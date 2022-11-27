@@ -3,13 +3,18 @@ import { Foo } from './Foo.js'
 
 export const App = {
     render() {
-        window.a = this
         return h('div', {
             id: 'test',
-            onClick: () => console.log('click'),
-            onMouseDown: () => console.log('down')
         }, [
-            h(Foo, { count: 1 })
+            h(Foo, {
+                count: 1,
+                onAdd: (a, b) => {
+                    console.log('onAdd', a, b)
+                },
+                onAddFoo: () => {
+                    console.log('ln:15 | MARK: addFoo')
+                }
+            })
         ])
     },
     setup() {

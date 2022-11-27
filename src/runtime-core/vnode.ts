@@ -2,13 +2,13 @@ import { isArray, isObject } from "../shared/index"
 import { ShapeFlags } from "../shared/shapeFlags"
 import type { ComponentInstance } from "./component"
 
-type Props = Record<string, any>
-type Children = VNode[] | string
+export type Props = Record<string, any>
+export type Children = VNode[] | string
 
 export type SetupResult = Record<string, any> | void
 export type Component = {
     data?: () => Record<string, any>
-    setup?: ((insance: ComponentInstance) => SetupResult) | SetupResult
+    setup?: ((props?: Props) => SetupResult) | SetupResult
     render?: (setupResult?: SetupResult) => VNode
     computed?: () => void // TODO
 }

@@ -1,4 +1,5 @@
 import { h } from '../../lib/guide-mini-vue-esm.js'
+import { Foo } from './Foo.js'
 
 export const App = {
     render() {
@@ -8,8 +9,7 @@ export const App = {
             onClick: () => console.log('click'),
             onMouseDown: () => console.log('down')
         }, [
-            h('span', {}, 'hi, '),
-            h('b', { class: 'test1' }, this.msg)
+            h(Foo, { count: 1 })
         ])
     },
     setup() {

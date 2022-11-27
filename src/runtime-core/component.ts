@@ -2,12 +2,16 @@ import { isObject } from '../shared/index';
 import { VNode, VNodeType, Component } from './index'
 import type { SetupResult } from './index'
 import { publicProxyHandlers } from './componentPublicProxyHandler';
+import { Props } from './vnode';
+import { initProps } from './componentProps';
+import { shallowReadonly } from '../reactivity/reactive';
 
 export type ComponentInstance = {
     vnode: VNode
     type?: VNodeType
     setupState?: SetupResult
     proxy?: Record<string, any>
+    props?: Props
 }
 export type CreateComponentInstance = (vnode: VNode) => ComponentInstance
 export const createComponentInstance: CreateComponentInstance = (vnode) => {
@@ -21,17 +25,18 @@ export const createComponentInstance: CreateComponentInstance = (vnode) => {
 export type SetupComponent = (instance: ComponentInstance) => void;
 export const setupComponent: SetupComponent = (instance) => {
     // TODO:
-    // initProps
+    initProps(instance, instance.vnode.props)
     // initSlots
     setupStatefulComponent(instance)
 };
+
 
 export type SetupStatefulComponent = (instance: ComponentInstance) => void
 export const setupStatefulComponent: SetupStatefulComponent = (instance) => {
     instance.type = instance.vnode.type
     const component = instance.type
     const { setup } = component as Component
-    const setupResult = (typeof setup === 'function' ? setup(instance) : setup) ?? {}
+    const setupResult = (typeof setup === 'function' ? setup(shallowReadonly(instance?.props ?? {})) : setup) ?? {}
 
     handleSetupResult(instance, setupResult)
 

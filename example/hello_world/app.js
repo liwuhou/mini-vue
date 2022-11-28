@@ -1,25 +1,26 @@
-import { h } from '../../lib/guide-mini-vue-esm.js'
-import { Foo } from './Foo.js'
+import { createTextVNode, h } from "../../lib/guide-mini-vue-esm.js";
+import { Foo } from "./Foo.js";
 
 export const App = {
-    render() {
-        return h('div', {
-            id: 'test',
-        }, [
-            h(Foo, {
-                count: 1,
-                onAdd: (a, b) => {
-                    console.log('onAdd', a, b)
-                },
-                onAddFoo: () => {
-                    console.log('ln:15 | MARK: addFoo')
-                }
-            })
-        ])
-    },
-    setup() {
-        return {
-            msg: 'vue3'
-        }
-    }
-}
+  name: "App",
+  render() {
+    const app = h("div", {}, "app");
+    const foo = h(
+      Foo,
+      {},
+      {
+        header: ({ age }) => [
+          h("p", {}, `foo ${age}`),
+          createTextVNode("test"),
+        ],
+        footer: h("p", {}, "foo p2"),
+      }
+    );
+    // const foo = h(Foo, {}, h('p', {}, 'foop'))
+
+    return h("div", {}, [app, foo]);
+  },
+  setup() {
+    return {};
+  },
+};

@@ -1,13 +1,15 @@
-import type { SetupResult } from './index'
 import type { UserEmit } from './componentEmit';
-import type { VNode, VNodeType, Component } from './index'
+import type { Component, SetupResult, VNode, VNodeType } from './index';
 import type { Props } from './vnode';
 
-import { isObject } from '../shared/index';
-import { publicProxyHandlers } from './componentPublicProxyHandler';
-import { initProps } from './componentProps';
 import { shallowReadonly } from '../reactivity/reactive';
-import { emit } from './componentEmit'
+import { isObject } from '../shared/index';
+import { emit } from './componentEmit';
+import { initProps } from './componentProps';
+import { publicProxyHandlers } from './componentPublicProxyHandler';
+import { initSlots } from './componentSlots';
+
+export type Slots = Record<string, VNode[] | string[]>
 
 export type ComponentInstance = {
     vnode: VNode
@@ -15,6 +17,7 @@ export type ComponentInstance = {
     setupState?: SetupResult
     proxy?: Record<string, any>
     props?: Props
+    slots?: Slots
     emit: UserEmit
 }
 export type CreateComponentInstance = (vnode: VNode) => ComponentInstance
@@ -24,6 +27,7 @@ export const createComponentInstance: CreateComponentInstance = (vnode) => {
         type: vnode.type,
         setupState: {},
         props: {},
+        slots: {},
         emit: () => { }
     }
     instance.emit = emit.bind(null, instance)
@@ -33,9 +37,8 @@ export const createComponentInstance: CreateComponentInstance = (vnode) => {
 
 export type SetupComponent = (instance: ComponentInstance) => void;
 export const setupComponent: SetupComponent = (instance) => {
-    // TODO:
     initProps(instance, instance.vnode.props)
-    // initSlots
+    initSlots(instance, instance.vnode.children as Slots)
     setupStatefulComponent(instance)
 };
 

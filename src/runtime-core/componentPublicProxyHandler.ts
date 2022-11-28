@@ -5,7 +5,8 @@ interface PublicPropertiesMap {
     [key: string | symbol]: (instance: ComponentInstance) => any
 }
 const publicPropertiesMap: PublicPropertiesMap = {
-    $el: (i) => i.vnode.el
+    $el: (i) => i.vnode.el,
+    $slots: (i) => i.slots
 }
 
 export const publicProxyHandlers: ProxyHandler<{ _: ComponentInstance }> = {

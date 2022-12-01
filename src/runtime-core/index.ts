@@ -1,4 +1,7 @@
 export {
+  inject, provide
+} from './apiInject'
+export {
   createComponentInstance, getCurrentInstance, setupComponent
 } from './component'
 export type {

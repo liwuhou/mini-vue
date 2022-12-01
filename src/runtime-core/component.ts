@@ -18,19 +18,23 @@ export type ComponentInstance = {
   proxy?: Record<string, any>
   props?: Props
   slots?: Slots
+  provides: Record<string, any>
+  parent?: ComponentInstance
   emit: UserEmit
 }
 
 let currentInstance: null | ComponentInstance = null
 
-export type CreateComponentInstance = (vnode: VNode) => ComponentInstance
-export const createComponentInstance: CreateComponentInstance = (vnode) => {
+export type CreateComponentInstance = (vnode: VNode, parent?: ComponentInstance) => ComponentInstance
+export const createComponentInstance: CreateComponentInstance = (vnode, parent) => {
   const instance: ComponentInstance = {
     vnode,
     type: vnode.type,
     setupState: {},
     props: {},
     slots: {},
+    provides: parent ? parent.provides : {},
+    parent,
     emit: () => { }
   }
   instance.emit = emit.bind(null, instance)

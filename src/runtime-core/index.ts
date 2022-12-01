@@ -1,6 +1,5 @@
 export {
-  createComponentInstance,
-  setupComponent
+  createComponentInstance, getCurrentInstance, setupComponent
 } from './component'
 export type {
   ComponentInstance, CreateComponentInstance, SetupComponent

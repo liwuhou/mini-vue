@@ -66,7 +66,7 @@ const processFragment: ProcessFragment = (vnode, container) => {
 type ProcessText = (vnode: VNode, container: Container) => void
 const processText: ProcessText = (vnode, container) => {
   const { children } = vnode
-  const textNode = document.createTextNode(children as string)
+  const textNode = vnode.el = document.createTextNode(children as string)
   container.append(textNode)
 }
 

@@ -1,7 +1,14 @@
-import { h, renderSlots } from "../../lib/guide-mini-vue-esm.js";
+import {
+  getCurrentInstance,
+  h,
+  renderSlots,
+} from "../../lib/guide-mini-vue-esm.js";
 
 export const Foo = {
+  name: "Foo",
   setup() {
+    const instance = getCurrentInstance();
+    console.log("🤔 ~ file: Foo.js ~ line 6 ~ setup ~ instance", instance);
     return {};
   },
   render() {

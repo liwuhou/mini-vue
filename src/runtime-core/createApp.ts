@@ -1,29 +1,23 @@
-import { render, createVNode } from './index'
+import type { Renderer } from './renderer'
+import { createVNode } from './vnode'
 
 export type AppComponent = {
-    mounted(container: string | Element): void
+  mounted(container: string | Element): void
 }
+
 export type CreateApp = (rootComponent: string) => AppComponent
 
-export const createApp: CreateApp = (rootComponent) => {
+type CreateAppAPI = (renderer: Renderer, findElement: (root: string | Element) => Element) => CreateApp
+export const createAppAPI: CreateAppAPI = (renderer, findElement) => {
+  return (rootComponent) => {
     return {
-        mounted(rootContainer) {
-            const rootElement = findElement(rootContainer)
-            // transform vnode
-            const vnode = createVNode(rootComponent)
+      mounted(rootContainer) {
+        const rootElement = findElement(rootContainer)
+        // transform vnode
+        const vnode = createVNode(rootComponent)
 
-            render(vnode, rootElement)
-        }
+        renderer(vnode, rootElement)
+      }
     }
-}
-
-const findElement = (rootStr: string | Element): Element | never => {
-    if (typeof rootStr === 'string') {
-        const elm = document.querySelector(rootStr)
-        if (!elm) throw new TypeError('Mounte method need a Element!')
-
-        return elm
-    } else {
-        return rootStr
-    }
+  }
 }

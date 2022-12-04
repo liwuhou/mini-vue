@@ -1,17 +1,17 @@
-import { track } from "./index"
+import { track } from "./effect"
 
 export class Dep {
-    deps: Set<() => {}>
+  deps: Set<() => {}>
 
-    constructor() {
-        this.deps = new Set()
-    }
+  constructor() {
+    this.deps = new Set()
+  }
 
-    depend() {
-        track(this, 'value')
-    }
+  depend() {
+    track(this, 'value')
+  }
 
-    notify() {
-        this.deps.forEach((dep) => dep?.())
-    }
+  notify() {
+    this.deps.forEach((dep) => dep?.())
+  }
 }

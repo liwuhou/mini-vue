@@ -1,6 +1,6 @@
 import type { UserEmit } from "./componentEmit"
 
-import { isArray, isObject } from "../shared/index"
+import { isArray, isObject } from "../shared"
 import { ShapeFlags } from "../shared/shapeFlags"
 import { Slots } from "./component"
 

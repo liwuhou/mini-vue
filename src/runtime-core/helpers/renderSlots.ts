@@ -1,5 +1,5 @@
 import type { Children, VNode } from '../vnode'
-import { createVNode, Fragment } from "../vnode"
+import { createVNode, Fragment } from '../vnode'
 
 type SlotsProps = Record<string, any>
 type SlotsVNode = Children | ((props?: SlotsProps) => Children)

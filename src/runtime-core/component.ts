@@ -1,9 +1,9 @@
+import type { Component, SetupResult, VNode, VNodeType } from '.';
 import type { UserEmit } from './componentEmit';
-import type { Component, SetupResult, VNode, VNodeType } from './index';
 import type { Props } from './vnode';
 
 import { shallowReadonly } from '../reactivity/reactive';
-import { isObject } from '../shared/index';
+import { isObject } from '../shared';
 import { emit } from './componentEmit';
 import { initProps } from './componentProps';
 import { publicProxyHandlers } from './componentPublicProxyHandler';

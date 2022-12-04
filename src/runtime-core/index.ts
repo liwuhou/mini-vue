@@ -8,7 +8,7 @@ export type {
   ComponentInstance, CreateComponentInstance, SetupComponent
 } from './component'
 export {
-  createApp
+  createAppAPI
 } from './createApp'
 export type {
   AppComponent,
@@ -21,8 +21,11 @@ export {
   renderSlots
 } from './helpers/renderSlots'
 export {
-  render
-} from './render'
+  createRenderer
+} from './renderer'
+export type {
+  Renderer
+} from './renderer'
 export {
   createTextVNode, createVNode
 } from './vnode'

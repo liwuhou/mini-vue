@@ -3,10 +3,10 @@ import { EMPTY_OBJ, isObject } from '../shared'
 import { ShapeFlags } from '../shared/shapeFlags'
 import { ComponentInstance, createComponentInstance, setupComponent } from './component'
 import { CreateApp, createAppAPI } from './createApp'
-import type { Props, VNode } from './vnode'
+import type { Children, Props, VNode } from './vnode'
 import { Component, Fragment, Text } from './vnode'
 
-export type Renderer = (vnode: VNode, container: Container, parentInstance?: ComponentInstance) => void
+export type Renderer = (vnode: VNode, container: Container, parentInstance: ComponentInstance) => void
 type Container = Element
 type ElementNode = VNode & { type: string }
 
@@ -14,6 +14,8 @@ interface CreateRenderOption<E = Element> {
   createElement(type: string): E
   patchProps(elm: E, attr: string, prevVal: any, nextVal: any): void
   insert(child: E, parent: E): void
+  remove(child: E): void
+  setElementText(elm: E, text: string): void
   findElement(type: string | E): E
 }
 
@@ -23,6 +25,8 @@ export const createRenderer: CreateRenderer = (options) => {
     createElement: hostCreateElement,
     patchProps: hostPatchProps,
     insert: hostInsert,
+    remove: hostRemove,
+    setElementText: hostSetElementText,
     findElement: hostFindElement
   } = options
 
@@ -31,7 +35,7 @@ export const createRenderer: CreateRenderer = (options) => {
     patch(null, vnode, container, parentInstance)
   }
 
-  type Patch = (n1: VNode | ElementNode | null, n2: VNode | ElementNode, container: Container, parentInstance?: ComponentInstance) => void
+  type Patch = (n1: VNode | ElementNode | null, n2: VNode | ElementNode, container: Container, parentInstance: ComponentInstance) => void
   const patch: Patch = (n1, n2, container, parentInstance) => {
     const { type, shapeFlags } = n2
     switch (type) {
@@ -52,12 +56,12 @@ export const createRenderer: CreateRenderer = (options) => {
     }
   }
 
-  type ProcessComponent = (vnode: VNode, container: Container, parentInstance?: ComponentInstance) => void
+  type ProcessComponent = (vnode: VNode, container: Container, parentInstance: ComponentInstance) => void
   const processComponent: ProcessComponent = (vnode, container, parentInstance) => {
     mountComponent(vnode, container, parentInstance)
   }
 
-  type MountComponent = (initialVnode: VNode, container: Container, parentInstance?: ComponentInstance) => void
+  type MountComponent = (initialVnode: VNode, container: Container, parentInstance: ComponentInstance) => void
   const mountComponent: MountComponent = (initialVnode, container, parentInstance) => {
     const instance = createComponentInstance(initialVnode, parentInstance)
 
@@ -89,9 +93,9 @@ export const createRenderer: CreateRenderer = (options) => {
     })
   }
 
-  type ProcessFragment = (n1: VNode | null, n2: VNode, container: Container, parentInstance?: ComponentInstance) => void
+  type ProcessFragment = (n1: VNode | null, n2: VNode, container: Container, parentInstance: ComponentInstance) => void
   const processFragment: ProcessFragment = (n1, n2, container, parentInstance) => {
-    mountChildren(n2, container, parentInstance)
+    mountChildren(n2.children as Children, container, parentInstance)
   }
 
   type ProcessText = (n1: VNode | null, n2: VNode, container: Container) => void
@@ -101,24 +105,70 @@ export const createRenderer: CreateRenderer = (options) => {
     container.append(textNode)
   }
 
-  type ProcessElement = (n1: ElementNode, n2: ElementNode, container: Container, parentInstance?: ComponentInstance) => void
+  type ProcessElement = (n1: ElementNode, n2: ElementNode, container: Container, parentInstance: ComponentInstance) => void
   const processElement: ProcessElement = (n1, n2, container, parentInstance) => {
     if (!n1) {
       mountElement(n2, container, parentInstance)
     } else {
-      patchElement(n1, n2, container)
+      patchElement(n1, n2, container, parentInstance)
     }
   }
 
-  type PatchElement = (n1: ElementNode, n2: ElementNode, container: Container) => void
-  const patchElement: PatchElement = (n1, n2, container) => {
+  type PatchElement = (n1: ElementNode, n2: ElementNode, container: Container, parentInstance: ComponentInstance) => void
+  const patchElement: PatchElement = (n1, n2, container, parentInstance) => {
     console.log('🤔 ~ file: renderer.ts:114 ~ patchElement ~ n1, n2, container', n1, n2, container)
 
     const oldProps = n1.props ?? EMPTY_OBJ
     const newProps = n2.props ?? EMPTY_OBJ
-    if (n2.el) {
-      patchProps(n2.el, oldProps, newProps)
+
+    patchChildren(n1, n2, container, parentInstance)
+    patchProps(n2.el!, oldProps, newProps)
+  }
+
+  type PatchChildren = (n1: ElementNode, n2: ElementNode, container: Container, parentInstance: ComponentInstance) => void
+  const patchChildren: PatchChildren = (n1, n2, container, parentInstance) => {
+    const prevShapeFlag = n1.shapeFlags
+    const c1 = n1.children
+    const nextShapeFlag = n2.shapeFlags
+    const c2 = n2.children
+
+    if (nextShapeFlag & ShapeFlags.TEXT_CHILDREN) {
+      if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+        // handle n1's Array type children then n2's children is text type 
+        unmountChildren(n1.children as Children)
+      }
+
+      if (c1 !== c2) {
+        // handle n1's children type and n2's chidlren type are text string
+        // or handle case that n1's children is Array but n2's children is text type
+        hostSetElementText(n2.el!, c2 as string)
+      }
+    } else {
+      if (prevShapeFlag & ShapeFlags.TEXT_CHILDREN) {
+        // handle n1's children is Text then n2's children is Array of component
+        hostSetElementText(n2.el!, '')
+        mountChildren(n2.children as Children, container, parentInstance)
+      } else {
+        // hadnle both n1's children and n2's children are array
+        // FIXME: implement diff method refactor the flow code
+        // easy mode:
+        unmountChildren(n1.children as Children)
+        mountChildren(n2.children as Children, container, parentInstance)
+      }
     }
+
+
+
+  }
+
+  type UnmountChildren = (children: Children) => void
+  const unmountChildren: UnmountChildren = (children) => {
+    (children as Array<VNode>).forEach((item) => {
+      if (item.el) {
+        hostRemove(item.el)
+      }
+    })
+
   }
 
   type PatchProps = (el: Element, oldProps: Props, newProps: Props) => void
@@ -143,7 +193,7 @@ export const createRenderer: CreateRenderer = (options) => {
     }
   }
 
-  type MountElemet = (n2: ElementNode, container: Container, parentInstance?: ComponentInstance) => void
+  type MountElemet = (n2: ElementNode, container: Container, parentInstance: ComponentInstance) => void
   const mountElement: MountElemet = (n2, container, parentInstance) => {
     const { type, props = {} } = n2
     const element = n2.el = hostCreateElement(type)
@@ -154,19 +204,18 @@ export const createRenderer: CreateRenderer = (options) => {
       }
     }
 
-    mountChildren(n2, element, parentInstance)
-
+    mountChildren(n2.children as Children, element, parentInstance)
     hostInsert(element, container)
   }
 
-  type MountChildren = (n2: VNode, container: Container, parentInstance?: ComponentInstance) => void
-  const mountChildren: MountChildren = (n2, container, parentInstance) => {
-    const { shapeFlags, children } = n2
-    if (shapeFlags & ShapeFlags.TEXT_CHILDREN) {
-      container.textContent = String(children)
-    } else if (shapeFlags & ShapeFlags.ARRAY_CHILDREN) {
-      (children as VNode[]).forEach((node) => {
-        patch(null, node, container, parentInstance)
+  type MountChildren = (children: Children, container: Container, parentInstance: ComponentInstance) => void
+  const mountChildren: MountChildren = (children, container, parentInstance) => {
+    if (!children) return
+    if (typeof children === 'string') {
+      hostSetElementText(container, children)
+    } else {
+      children.forEach((v) => {
+        patch(null, v, container, parentInstance)
       })
     }
   }

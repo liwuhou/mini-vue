@@ -25,6 +25,15 @@ const insert: Insert = (child, parent) => {
   parent.appendChild(child)
 }
 
+type Remove = (child: Element) => void
+const remove: Remove = (child) => {
+  const parent = child?.parentNode
+
+  if (parent) {
+    parent.removeChild(child)
+  }
+}
+
 type FindElement = (rootStr: string | Element) => Element | never
 const findElement: FindElement = (rootStr: string | Element): Element | never => {
   if (typeof rootStr === 'string') {
@@ -37,11 +46,18 @@ const findElement: FindElement = (rootStr: string | Element): Element | never =>
   }
 }
 
+type SetElementText = (el: Element, text: string) => void
+const setElementText: SetElementText = (el, text) => {
+  el.textContent = text
+}
+
 const _createApp = createRenderer({
   createElement,
   patchProps,
   insert,
-  findElement
+  remove,
+  findElement,
+  setElementText,
 })
 
 export const createApp: CreateApp = (...args) => {

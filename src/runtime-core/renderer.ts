@@ -1,8 +1,9 @@
-import { isObject } from '../shared'
+import { effect } from '../reactivity'
+import { EMPTY_OBJ, isObject } from '../shared'
 import { ShapeFlags } from '../shared/shapeFlags'
 import { ComponentInstance, createComponentInstance, setupComponent } from './component'
 import { CreateApp, createAppAPI } from './createApp'
-import type { VNode } from './vnode'
+import type { Props, VNode } from './vnode'
 import { Component, Fragment, Text } from './vnode'
 
 export type Renderer = (vnode: VNode, container: Container, parentInstance?: ComponentInstance) => void
@@ -11,7 +12,7 @@ type ElementNode = VNode & { type: string }
 
 interface CreateRenderOption<E = Element> {
   createElement(type: string): E
-  patchProps(elm: E, attr: string, val: any): void
+  patchProps(elm: E, attr: string, prevVal: any, nextVal: any): void
   insert(child: E, parent: E): void
   findElement(type: string | E): E
 }
@@ -19,34 +20,34 @@ interface CreateRenderOption<E = Element> {
 export type CreateRenderer<T = Element> = (options: CreateRenderOption<T>) => CreateApp
 export const createRenderer: CreateRenderer = (options) => {
   const {
-    createElement,
-    patchProps,
-    insert,
-    findElement
+    createElement: hostCreateElement,
+    patchProps: hostPatchProps,
+    insert: hostInsert,
+    findElement: hostFindElement
   } = options
 
   const renderer: Renderer = (vnode, container, parentInstance) => {
     // patch 
-    patch(vnode, container, parentInstance)
+    patch(null, vnode, container, parentInstance)
   }
 
-  type Patch = (node: VNode | ElementNode, container: Container, parentInstance?: ComponentInstance) => void
-  const patch: Patch = (vnode, container, parentInstance) => {
-    const { type, shapeFlags } = vnode
+  type Patch = (n1: VNode | ElementNode | null, n2: VNode | ElementNode, container: Container, parentInstance?: ComponentInstance) => void
+  const patch: Patch = (n1, n2, container, parentInstance) => {
+    const { type, shapeFlags } = n2
     switch (type) {
       case Fragment:
-        processFragment(vnode, container, parentInstance)
+        processFragment(n1, n2, container, parentInstance)
         break;
       case Text:
-        processText(vnode, container)
+        processText(n1, n2, container)
         break;
       default:
         if (shapeFlags & ShapeFlags.ELEMENT) {
           // if element -> mount the element to view
-          processElement(vnode as ElementNode, container, parentInstance)
+          processElement(n1 as ElementNode, n2 as ElementNode, container, parentInstance)
         } else if (shapeFlags & ShapeFlags.STATEFUL_COMPONENT) {
           // if vnode -> process the vnode 
-          processComponent(vnode, container, parentInstance)
+          processComponent(n2, container, parentInstance)
         }
     }
   }
@@ -67,59 +68,109 @@ export const createRenderer: CreateRenderer = (options) => {
 
   type SetupRenderEffect = (instance: ComponentInstance, initialVnode: VNode, container: Container) => void
   const setupRenderEffect: SetupRenderEffect = (instance, initialVnode, container) => {
-    const subTree = (instance.type as Component)?.render?.call(instance.proxy) as VNode
-    // vnode -> patch => dom ,mounted the root component
+    effect(() => {
+      if (!instance.isMounted) {
+        const subTree = (instance.subTree = (instance.type as Component)?.render?.call(instance.proxy) as VNode)
+        console.log('🤔 ~ file: renderer.ts:74 ~ effect ~ subTree', subTree)
+        // vnode -> patch => dom ,mounted the root component
 
-    patch(subTree, container, instance)
-    initialVnode.el = subTree.el
+        patch(null, subTree, container, instance)
+        initialVnode.el = subTree.el
+        instance.isMounted = true
+      } else {
+        const preSubTree = instance.subTree!
+        console.log('🤔 ~ file: renderer.ts:81 ~ effect ~ preSubTree', preSubTree)
+        const nextSubTree = (instance.subTree = (instance.type as Component)!.render!.call(instance.proxy))
+        nextSubTree.el = preSubTree.el
+        console.log('🤔 ~ file: renderer.ts:83 ~ effect ~ nextSubTree', nextSubTree)
+
+        patch(preSubTree, nextSubTree, container, instance)
+      }
+    })
   }
 
-  type ProcessFragment = (vnode: VNode, container: Container, parentInstance?: ComponentInstance) => void
-  const processFragment: ProcessFragment = (vnode, container, parentInstance) => {
-    mountChildren(vnode, container, parentInstance)
+  type ProcessFragment = (n1: VNode | null, n2: VNode, container: Container, parentInstance?: ComponentInstance) => void
+  const processFragment: ProcessFragment = (n1, n2, container, parentInstance) => {
+    mountChildren(n2, container, parentInstance)
   }
 
-  type ProcessText = (vnode: VNode, container: Container) => void
-  const processText: ProcessText = (vnode, container) => {
-    const { children } = vnode
-    const textNode = vnode.el = document.createTextNode(children as string)
+  type ProcessText = (n1: VNode | null, n2: VNode, container: Container) => void
+  const processText: ProcessText = (n1, n2, container) => {
+    const { children } = n2
+    const textNode = document.createTextNode(children as string)
     container.append(textNode)
   }
 
-  type ProcessElement = (vnode: ElementNode, container: Container, parentInstance?: ComponentInstance) => void
-  const processElement: ProcessElement = (vnode, contaner, parentInstance) => {
-    mountElement(vnode, contaner, parentInstance)
+  type ProcessElement = (n1: ElementNode, n2: ElementNode, container: Container, parentInstance?: ComponentInstance) => void
+  const processElement: ProcessElement = (n1, n2, container, parentInstance) => {
+    if (!n1) {
+      mountElement(n2, container, parentInstance)
+    } else {
+      patchElement(n1, n2, container)
+    }
   }
 
-  type MountElemet = (vnode: ElementNode, container: Container, parentInstance?: ComponentInstance) => void
-  const mountElement: MountElemet = (vnode, container, parentInstance) => {
-    const { type, props = {} } = vnode
-    const element = vnode.el = createElement(type)
+  type PatchElement = (n1: ElementNode, n2: ElementNode, container: Container) => void
+  const patchElement: PatchElement = (n1, n2, container) => {
+    console.log('🤔 ~ file: renderer.ts:114 ~ patchElement ~ n1, n2, container', n1, n2, container)
 
-    if (isObject(props)) {
+    const oldProps = n1.props ?? EMPTY_OBJ
+    const newProps = n2.props ?? EMPTY_OBJ
+    if (n2.el) {
+      patchProps(n2.el, oldProps, newProps)
+    }
+  }
 
-      for (const attr of Object.keys(props!)) {
-        patchProps(element, attr, props[attr])
+  type PatchProps = (el: Element, oldProps: Props, newProps: Props) => void
+  const patchProps: PatchProps = (el, oldProps, newProps) => {
+    if (oldProps === newProps) return
+
+    for (const key in newProps) {
+      const prevProp = oldProps[key]
+      const nextProp = newProps[key]
+
+      if (prevProp !== nextProp) {
+        hostPatchProps(el, key, prevProp, nextProp)
       }
     }
 
-    mountChildren(vnode, element, parentInstance)
+    if (oldProps === EMPTY_OBJ) return
 
-    insert(element, container)
+    for (const key in oldProps) {
+      if (!(key in newProps)) {
+        hostPatchProps(el, key, oldProps[key], null)
+      }
+    }
   }
 
-  type MountChildren = (vnode: VNode, container: Container, parentInstance?: ComponentInstance) => void
-  const mountChildren: MountChildren = (vnode, container, parentInstance) => {
-    const { shapeFlags, children } = vnode
+  type MountElemet = (n2: ElementNode, container: Container, parentInstance?: ComponentInstance) => void
+  const mountElement: MountElemet = (n2, container, parentInstance) => {
+    const { type, props = {} } = n2
+    const element = n2.el = hostCreateElement(type)
+
+    if (isObject(props)) {
+      for (const attr of Object.keys(props!)) {
+        hostPatchProps(element, attr, null, props[attr])
+      }
+    }
+
+    mountChildren(n2, element, parentInstance)
+
+    hostInsert(element, container)
+  }
+
+  type MountChildren = (n2: VNode, container: Container, parentInstance?: ComponentInstance) => void
+  const mountChildren: MountChildren = (n2, container, parentInstance) => {
+    const { shapeFlags, children } = n2
     if (shapeFlags & ShapeFlags.TEXT_CHILDREN) {
       container.textContent = String(children)
     } else if (shapeFlags & ShapeFlags.ARRAY_CHILDREN) {
       (children as VNode[]).forEach((node) => {
-        patch(node, container, parentInstance)
+        patch(null, node, container, parentInstance)
       })
     }
   }
 
-  return createAppAPI(renderer, findElement)
+  return createAppAPI(renderer, hostFindElement)
 }
 

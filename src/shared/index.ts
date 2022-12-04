@@ -1,5 +1,7 @@
 export const extend = Object.assign
 
+export const EMPTY_OBJ = Object.create(null)
+
 export const isObject = (val: unknown): boolean => !!val && typeof val === 'object'
 
 export const isArray = (val: unknown): boolean => Array.isArray(val)
@@ -14,5 +16,5 @@ export const hasOwn = (obj: Record<string | symbol, any>, key: string | symbol):
 export const toCapitalizeCase = (title: string): string => `${title.charAt(0).toUpperCase()}${title.slice(1)}`
 
 export const camelize = (title: string): string => title.replace(/-(\w)/g, (_, c: string) => {
-    return c ? c.toUpperCase() : ''
+  return c ? c.toUpperCase() : ''
 })

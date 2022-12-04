@@ -2,6 +2,7 @@ import type { Component, SetupResult, VNode, VNodeType } from '.';
 import type { UserEmit } from './componentEmit';
 import type { Props } from './vnode';
 
+import { proxyRef } from '../reactivity';
 import { shallowReadonly } from '../reactivity/reactive';
 import { isObject } from '../shared';
 import { emit } from './componentEmit';
@@ -12,6 +13,7 @@ import { initSlots } from './componentSlots';
 export type Slots = Record<string, VNode[] | string[]>
 
 export type ComponentInstance = {
+  isMounted: boolean
   vnode: VNode
   type?: VNodeType
   setupState?: SetupResult
@@ -20,6 +22,7 @@ export type ComponentInstance = {
   slots?: Slots
   provides: Record<string, any>
   parent?: ComponentInstance
+  subTree?: VNode
   emit: UserEmit
 }
 
@@ -28,6 +31,7 @@ let currentInstance: null | ComponentInstance = null
 export type CreateComponentInstance = (vnode: VNode, parent?: ComponentInstance) => ComponentInstance
 export const createComponentInstance: CreateComponentInstance = (vnode, parent) => {
   const instance: ComponentInstance = {
+    isMounted: false,
     vnode,
     type: vnode.type,
     setupState: {},
@@ -73,7 +77,7 @@ const handleSetupResult: HandleSetupResult = (instance, result) => {
   //TODO: handle setupResult type is function
 
   if (isObject(result)) {
-    instance.setupState = result
+    instance.setupState = proxyRef(result as Object)
   }
 
   finishComponentSetup(instance)

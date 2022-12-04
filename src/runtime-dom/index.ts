@@ -7,12 +7,16 @@ const createElement: CreateElement = (type) => {
   return document.createElement(type)
 }
 
-type PatchProps = (elm: Element, attr: string, val: any) => void
-const patchProps: PatchProps = (element, attr, val) => {
+type PatchProps = (elm: Element, attr: string, prevVal: any, nextVal: any) => void
+const patchProps: PatchProps = (element, attr, prevVal, nextVal) => {
   if (isOn(attr)) {
-    element.addEventListener(attr.substring(2).toLowerCase(), val)
+    element.addEventListener(attr.substring(2).toLowerCase(), nextVal)
   } else {
-    element.setAttribute(attr, val)
+    if (nextVal === undefined || nextVal === null) {
+      element.removeAttribute(attr)
+    } else {
+      element.setAttribute(attr, nextVal)
+    }
   }
 }
 
@@ -45,3 +49,4 @@ export const createApp: CreateApp = (...args) => {
 }
 
 export * from '../runtime-core'
+

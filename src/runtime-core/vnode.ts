@@ -25,7 +25,7 @@ export type VNode = {
   type: VNodeType,
   props?: Props
   children?: Children | Slots
-  el: null | Element | Text
+  el: null | Element
   shapeFlags: number
   emit?: UserEmit
 }
